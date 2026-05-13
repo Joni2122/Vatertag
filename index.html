@@ -1,245 +1,162 @@
 <!DOCTYPE html><html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Morgenplan Arcade</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }body {
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  color: white;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arcade Wetter Challenge</title>
+<style>
+body {
+  margin: 0;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
-}
-
-.container {
-  width: 90%;
-  max-width: 900px;
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(10px);
-  border-radius: 25px;
-  padding: 30px;
-  text-align: center;
-  box-shadow: 0 0 30px rgba(0,0,0,0.5);
-}
-
-h1 {
-  font-size: 3rem;
-  margin-bottom: 10px;
-}
-
-p {
-  margin-bottom: 20px;
-  color: #cbd5e1;
-}
-
-canvas {
-  background: #020617;
-  border: 4px solid #38bdf8;
-  border-radius: 15px;
-  display: block;
-  margin: 20px auto;
-}
-
-button {
-  background: #38bdf8;
-  border: none;
+  background: radial-gradient(circle at top, #1e3a8a, #020617 70%);
+  font-family: Arial, sans-serif;
   color: white;
-  padding: 14px 22px;
-  margin: 10px;
-  border-radius: 12px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: 0.2s;
-  font-weight: bold;
-}
+  overflow-x: hidden;
+}.container { width: 90%; max-width: 900px; background: rgba(15,23,42,0.9); border-radius: 30px; padding: 30px; text-align: center; box-shadow: 0 0 40px rgba(59,130,246,0.4); }
 
-button:hover {
-  transform: scale(1.05);
-  background: #0ea5e9;
-}
+h1 { font-size: 3.5rem; margin-bottom: 10px; background: linear-gradient(90deg,#38bdf8,#a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-.hidden {
-  display: none;
-}
+.subtitle { color: #cbd5e1; margin-bottom: 20px; font-size: 1.1rem; }
 
-.result {
-  margin-top: 25px;
-  padding: 25px;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.07);
-  animation: fadeIn 0.5s ease;
-}
+canvas { background: #0f172a; border-radius: 20px; border: 4px solid #38bdf8; display: block; margin: 20px auto; max-width: 100%; }
 
-.emoji {
-  font-size: 4rem;
-  margin-bottom: 15px;
-}
+#score { font-size: 1.4rem; margin-top: 15px; color: #38bdf8; font-weight: bold; }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+button { border: none; border-radius: 15px; padding: 14px 24px; margin: 10px; background: linear-gradient(135deg,#38bdf8,#7c3aed); color: white; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
 
-.winText {
-  color: #4ade80;
-  font-size: 1.4rem;
-  margin-top: 10px;
-  font-weight: bold;
-}
+button:hover { transform: scale(1.05); }
 
-  </style>
+.hidden { display: none; }
+
+.result { margin-top: 25px; padding: 25px; border-radius: 20px; background: rgba(255,255,255,0.06); }
+
+.emoji { font-size: 4rem; } </style>
+
 </head>
 <body>
-  <div class="container">
-    <h1>🎮 Morgenplan Arcade</h1>
-    <p>Fange 10 Sterne ein, um den geheimen Plan für morgen freizuschalten!</p><canvas id="game" width="700" height="400"></canvas>
+<div class="container">
+  <h1>🎮 Wetter Challenge</h1>
+  <div class="subtitle">Sammle 10 Sterne um den Plan für morgen freizuschalten!</div><canvas id="gameCanvas" width="700" height="400"></canvas>
 
-<div id="score">Punkte: 0 / 10</div>
+  <div id="score">Punkte: 0 / 10</div>  <div id="choiceBox" class="hidden">
+    <h2>🎉 Geschafft!</h2>
+    <p>Wie wird das Wetter morgen?</p><button onclick="showPlan('good')">☀️ Gutes Wetter</button>
+<button onclick="showPlan('bad')">🌧️ Schlechtes Wetter</button>
 
-<div id="winSection" class="hidden">
-  <div class="winText">Du hast gewonnen! 🎉</div>
-  <p>Wie wird das Wetter morgen?</p>
-  <button onclick="showPlan('gut')">☀️ Gutes Wetter</button>
-  <button onclick="showPlan('schlecht')">🌧️ Schlechtes Wetter</button>
-</div>
+  </div>  <div id="result" class="result hidden"></div>
+</div><script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
 
-<div id="result" class="result hidden"></div>
+const player = {
+  x: 100,
+  y: 100,
+  size: 30,
+  speed: 5
+};
 
-  </div>  <script>
-    const canvas = document.getElementById('game');
-    const ctx = canvas.getContext('2d');
+const star = {
+  x: 300,
+  y: 200,
+  size: 18
+};
 
-    const player = {
-      x: 340,
-      y: 330,
-      width: 25,
-      height: 25,
-      speed: 6
-    };
+const keys = {};
+let score = 0;
 
-    const star = {
-      x: Math.random() * 650,
-      y: Math.random() * 350,
-      size: 20
-    };
+function randomStar() {
+  star.x = Math.random() * (canvas.width - 40) + 20;
+  star.y = Math.random() * (canvas.height - 40) + 20;
+}
 
-    let score = 0;
-    const keys = {};
+window.addEventListener('keydown', (e) => {
+  keys[e.key] = true;
+});
 
-    document.addEventListener('keydown', (e) => {
-      keys[e.key.toLowerCase()] = true;
-    });
+window.addEventListener('keyup', (e) => {
+  keys[e.key] = false;
+});
 
-    document.addEventListener('keyup', (e) => {
-      keys[e.key.toLowerCase()] = false;
-    });
+function update() {
+  if (keys['ArrowLeft'] || keys['a']) player.x -= player.speed;
+  if (keys['ArrowRight'] || keys['d']) player.x += player.speed;
+  if (keys['ArrowUp'] || keys['w']) player.y -= player.speed;
+  if (keys['ArrowDown'] || keys['s']) player.y += player.speed;
 
-    function movePlayer() {
-      if (keys['arrowleft'] || keys['a']) player.x -= player.speed;
-      if (keys['arrowright'] || keys['d']) player.x += player.speed;
-      if (keys['arrowup'] || keys['w']) player.y -= player.speed;
-      if (keys['arrowdown'] || keys['s']) player.y += player.speed;
+  if (player.x < 0) player.x = 0;
+  if (player.y < 0) player.y = 0;
+  if (player.x > canvas.width - player.size) player.x = canvas.width - player.size;
+  if (player.y > canvas.height - player.size) player.y = canvas.height - player.size;
 
-      player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
-      player.y = Math.max(0, Math.min(canvas.height - player.height, player.y));
+  const dx = player.x + player.size / 2 - star.x;
+  const dy = player.y + player.size / 2 - star.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance < player.size) {
+    score++;
+    document.getElementById('score').innerText = `Punkte: ${score} / 10`;
+    randomStar();
+
+    if (score >= 10) {
+      document.getElementById('choiceBox').classList.remove('hidden');
     }
+  }
+}
 
-    function drawPlayer() {
-      ctx.fillStyle = '#38bdf8';
-      ctx.fillRect(player.x, player.y, player.width, player.height);
-    }
+function draw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    function drawStar() {
-      ctx.fillStyle = '#facc15';
-      ctx.beginPath();
-      ctx.arc(star.x, star.y, star.size / 2, 0, Math.PI * 2);
-      ctx.fill();
-    }
+  for(let i=0;i<60;i++) {
+    ctx.fillStyle = 'white';
+    ctx.fillRect((i*47)%canvas.width,(i*83)%canvas.height,2,2);
+  }
 
-    function checkCollision() {
-      const dx = player.x + player.width / 2 - star.x;
-      const dy = player.y + player.height / 2 - star.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
+  ctx.fillStyle = '#38bdf8';
+  ctx.fillRect(player.x, player.y, player.size, player.size);
 
-      if (distance < 25) {
-        score++;
-        document.getElementById('score').innerText = `Punkte: ${score} / 10`;
+  ctx.beginPath();
+  ctx.fillStyle = '#facc15';
+  ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+  ctx.fill();
+}
 
-        star.x = Math.random() * 650 + 20;
-        star.y = Math.random() * 350 + 20;
+function loop() {
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
 
-        if (score >= 10) {
-          document.getElementById('winSection').classList.remove('hidden');
-        }
-      }
-    }
+loop();
 
-    function drawBackground() {
-      ctx.fillStyle = '#020617';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+function showPlan(type) {
+  const result = document.getElementById('result');
+  result.classList.remove('hidden');
 
-      ctx.fillStyle = 'white';
-      for (let i = 0; i < 50; i++) {
-        const x = (i * 73) % canvas.width;
-        const y = (i * 41) % canvas.height;
-        ctx.fillRect(x, y, 2, 2);
-      }
-    }
-    }
-
-    function gameLoop() {
-      drawBackground();
-      movePlayer();
-      drawPlayer();
-      drawStar();
-      checkCollision();
-
-      requestAnimationFrame(gameLoop);
-    }
-
-    gameLoop();
-
-    function showPlan(weather) {
-      const result = document.getElementById('result');
-      result.classList.remove('hidden');
-
-      if (weather === 'gut') {
-        result.innerHTML = `
-          <div class="emoji">☀️⛰️🎲</div>
-          <h2>Plan bei gutem Wetter</h2>
-          <p>
-            Wir gehen hoch zur Hoggetse und essen dort etwas 🍔🥤<br><br>
-            Danach machen wir einen gemütlichen Spieleabend mit Snacks und Spielen 🎮🎲
-          </p>
-        `;
-      } else {
-        result.innerHTML = `
-          <div class="emoji">🌧️🍕🎬</div>
-          <h2>Plan bei schlechtem Wetter</h2>
-          <p>
-            Wir gehen ins Kino 🍿<br><br>
-            Dort laufen:<br>
-            🎥 Die 3 Fragezeichen<br>
-            🎥 Hoopers<br>
-            🎥 Checker Tobi<br><br>
-            Oder wir machen einen Spielenachmittag und bestellen Essen 🍕
-          </p>
-        `;
-      }
-    }
-  </script></body>
+  if(type === 'good') {
+    result.innerHTML = `
+      <div class="emoji">☀️⛰️🎲</div>
+      <h2>Plan bei gutem Wetter</h2>
+      <p>
+      Wir gehen hoch zur Hoggetse und essen dort etwas 🍔<br><br>
+      Danach machen wir einen Spieleabend 🎮🎲
+      </p>
+    `;
+  } else {
+    result.innerHTML = `
+      <div class="emoji">🌧️🎬🍕</div>
+      <h2>Plan bei schlechtem Wetter</h2>
+      <p>
+      Wir gehen ins Kino 🍿<br><br>
+      Filme:<br>
+      🎥 Die 3 Fragezeichen<br>
+      🎥 Hoopers<br>
+      🎥 Checker Tobi<br><br>
+      Oder Spielenachmittag mit Essen bestellen 🍕
+      </p>
+    `;
+  }
+}
+</script></body>
 </html>
