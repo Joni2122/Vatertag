@@ -2,128 +2,446 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Neon Pong Battle</title>
-<style>
-body{
-  margin:0;
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-family:Arial;
-  color:white;
-  background: linear-gradient(-45deg,#050816,#1a0b2e,#0b2a3d,#050816);
-  background-size:400% 400%;
-  animation: bg 12s ease infinite;
-}
-@keyframes bg{
-  0%{background-position:0% 50%}
-  50%{background-position:100% 50%}
-  100%{background-position:0% 50%}
-}.container{ text-align:center; }
+<title>Neon Pong Royale</title>
+<([webflow.com](https://webflow.com/blog/web-design-trends-2025?utm_source=chatgpt.com))00e5ff;
+    --pink: #ff3df2;
+    --violet: #7c3aed;
+    --text: #e5f3ff;
+    --panel: rgba(9, 14, 30, 0.72);
+    --line: rgba(255,255,255,0.12);
+  }{ box-sizing: border-box; } html, body { height: 100%; }
 
-h1{ margin-bottom:10px; font-size:2.5rem; background:linear-gradient(90deg,#00e5ff,#ff3df2,#7c3aed); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 
-canvas{ background:#050816; border:2px solid #00e5ff; box-shadow:0 0 25px #00e5ff; border-radius:12px; }
+body { margin: 0; min-height: 100vh; display: grid; place-items: center; overflow: hidden; color: var(--text); font-family: Inter, Segoe UI, Arial, sans-serif; background: radial-gradient(circle at 20% 20%, rgba(0,229,255,.18), transparent 22%), radial-gradient(circle at 80% 25%, rgba(255,61,242,.16), transparent 24%), radial-gradient(circle at 50% 85%, rgba(124,58,237,.18), transparent 28%), linear-gradient(-45deg, #030712, #091126, #140f2d, #030712); background-size: 100% 100%, 100% 100%, 100% 100%, 400% 400%; animation: backgroundFlow 18s ease infinite; }
 
-button{ margin-top:15px; padding:10px 18px; border:none; border-radius:10px; background:linear-gradient(90deg,#00e5ff,#7c3aed); color:white; font-weight:bold; cursor:pointer; }
+body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 44px 44px; mask-image: radial-gradient(circle at center, black 40%, transparent 100%); opacity: 0.45; animation: gridDrift 22s linear infinite; pointer-events: none; }
 
-.score{ margin:10px; font-size:1.2rem; } </style>
+body::after { content: ''; position: fixed; inset: -20%; background: radial-gradient(circle, rgba(0,229,255,.08), transparent 40%), radial-gradient(circle, rgba(255,61,242,.07), transparent 34%); filter: blur(40px); animation: glowPulse 8s ease-in-out infinite alternate; pointer-events: none; }
+
+@keyframes backgroundFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } } @keyframes gridDrift { from { transform: translateY(0); } to { transform: translateY(44px); } } @keyframes glowPulse { from { transform: scale(1); opacity: 0.85; } to { transform: scale(1.08); opacity: 1; } }
+
+.shell { position: relative; z-index: 1; width: min(96vw, 1120px); padding: 18px; }
+
+.frame { position: relative; padding: 18px; border-radius: 30px; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 0 25px rgba(0,229,255,.16), 0 0 80px rgba(255,61,242,.14), inset 0 1px 0 rgba(255,255,255,.08); backdrop-filter: blur(18px); overflow: hidden; }
+
+.frame::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,229,255,.14), rgba(255,61,242,.08), transparent 55%); pointer-events: none; }
+
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 6px 6px 18px; }
+
+.titleBlock { text-align: left; }
+
+h1 { margin: 0; font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1; letter-spacing: 0.08em; text-transform: uppercase; background: linear-gradient(90deg, var(--cyan), var(--pink), var(--violet), var(--cyan)); background-size: 300% 100%; animation: titleShift 7s linear infinite; -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 30px rgba(0,229,255,.22); }
+
+@keyframes titleShift { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
+
+.subtitle { margin-top: 8px; color: rgba(229,243,255,.78); font-size: 0.98rem; max-width: 60ch; line-height: 1.5; }
+
+.hud { display: grid; grid-template-columns: repeat(3, auto); gap: 10px; align-items: center; justify-content: end; }
+
+.pill { padding: 10px 14px; border-radius: 999px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); box-shadow: inset 0 0 18px rgba(255,255,255,.03); font-weight: 700; letter-spacing: .03em; white-space: nowrap; }
+
+.pill strong { color: white; }
+
+.boardWrap { position: relative; }
+
+canvas { width: min(94vw, 1060px); height: auto; display: block; margin: 0 auto; border-radius: 22px; background: radial-gradient(circle at top, rgba(0,229,255,.07), transparent 30%), linear-gradient(180deg, #040816, #080f22 60%, #040816); border: 1px solid rgba(0,229,255,.45); box-shadow: 0 0 30px rgba(0,229,255,.26), 0 0 90px rgba(255,61,242,.11), inset 0 0 22px rgba(255,255,255,.03); touch-action: none; }
+
+.hintRow { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 14px; color: rgba(229,243,255,.8); font-size: 0.95rem; }
+
+.buttonRow { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+
+button { border: 0; border-radius: 16px; padding: 12px 18px; color: white; font-weight: 800; letter-spacing: .03em; cursor: pointer; background: linear-gradient(135deg, var(--cyan), var(--violet), var(--pink)); background-size: 240% 240%; animation: buttonFlow 6s ease infinite; box-shadow: 0 0 20px rgba(0,229,255,.22), 0 0 25px rgba(255,61,242,.12); transition: transform .18s ease, box-shadow .18s ease; }
+
+button:hover { transform: translateY(-2px) scale(1.02); } button:active { transform: translateY(0) scale(.99); }
+
+@keyframes buttonFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+.overlay { position: absolute; inset: 18px; display: grid; place-items: center; pointer-events: none; }
+
+.modal { width: min(92%, 560px); padding: 26px; border-radius: 24px; background: rgba(4,10,24,.72); border: 1px solid rgba(255,255,255,.1); box-shadow: 0 0 30px rgba(0,229,255,.18), inset 0 1px 0 rgba(255,255,255,.05); text-align: center; opacity: 0; transform: translateY(16px) scale(.98); transition: opacity .22s ease, transform .22s ease; backdrop-filter: blur(16px); }
+
+.modal.show { opacity: 1; transform: translateY(0) scale(1); }
+
+.modal h2 { margin: 0 0 10px; font-size: clamp(1.7rem, 3vw, 2.3rem); }
+
+.modal p { margin: 0; color: rgba(229,243,255,.86); line-height: 1.6; font-size: 1.05rem; }
+
+.emoji { font-size: 3.2rem; margin-bottom: 8px; }
+
+.hidden { display: none; }
+
+@media (max-width: 760px) { .topbar { flex-direction: column; align-items: stretch; } .titleBlock { text-align: center; } .hud { justify-content: center; } .hintRow { text-align: center; justify-content: center; } } </style>
 
 </head>
-<body><div class="container">
-<h1>⚡ NEON PONG BATTLE</h1>
-<canvas id="game" width="800" height="400"></canvas>
-<div class="score" id="score">0 : 0</div>
-<button onclick="reset()">Neustart</button>
-</div><script>
+<body>
+  <div class="shell">
+    <div class="frame">
+      <div class="topbar">
+        <div class="titleBlock">
+          <h1>Neon Pong Royale</h1>
+          <div class="subtitle">Schieb den linken Schläger mit Maus, Touch oder W/S. Die AI rechts wird schneller, wenn du gut spielst.</div>
+        </div>
+        <div class="hud">
+          <div class="pill">Du: <strong id="leftScore">0</strong></div>
+          <div class="pill">AI: <strong id="rightScore">0</strong></div>
+          <div class="pill">Level: <strong id="level">1</strong></div>
+        </div>
+      </div><div class="boardWrap">
+    <canvas id="game" width="1100" height="620"></canvas>
+    <div class="overlay">
+      <div id="startModal" class="modal show">
+        <div class="emoji">⚡🏓✨</div>
+        <h2>Bereit?</h2>
+        <p>Bewege deinen Schläger mit Maus, Touch oder W/S. Klicke auf Start und versuche die AI zu schlagen.</p>
+        <div class="buttonRow">
+          <button id="startBtn">Spiel starten</button>
+        </div>
+      </div>
+
+      <div id="endModal" class="modal hidden">
+        <div class="emoji">🎉</div>
+        <h2>Gewonnen!</h2>
+        <p>Du hast das Match geholt und den Wetter-Plan freigeschaltet.</p>
+        <div class="buttonRow">
+          <button onclick="showPlan('good')">☀️ Gutes Wetter</button>
+          <button onclick="showPlan('bad')">🌧️ Schlechtes Wetter</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hintRow">
+    <div>Steuerung: Maus / Touch / W &amp; S</div>
+    <div>Ziel: 7 Punkte</div>
+    <div>Die AI passt sich an</div>
+  </div>
+
+  <div id="result" class="modal hidden" style="margin: 16px auto 0; max-width: 760px;"></div>
+</div>
+
+  </div><script>
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
+const leftScoreEl = document.getElementById('leftScore');
+const rightScoreEl = document.getElementById('rightScore');
+const levelEl = document.getElementById('level');
+const startModal = document.getElementById('startModal');
+const endModal = document.getElementById('endModal');
+const resultEl = document.getElementById('result');
+const startBtn = document.getElementById('startBtn');
 
-let left = {x:20,y:160,w:10,h:80,score:0};
-let right = {x:770,y:160,w:10,h:80,score:0};
+const W = canvas.width;
+const H = canvas.height;
+const centerX = W / 2;
+const centerY = H / 2;
+const targetScore = 7;
 
-let ball = {x:400,y:200,vx:4,vy:3,r:8};
-
+let running = false;
+let gameOver = false;
+let winner = null;
+let scoreL = 0;
+let scoreR = 0;
+let level = 1;
 let keys = {};
+let mouseY = centerY;
+let pointerActive = false;
+let lastTime = performance.now();
+let particles = [];
 
-document.addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true);
-document.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+const left = { x: 42, y: centerY - 70, w: 16, h: 140 };
+const right = { x: W - 58, y: centerY - 70, w: 16, h: 140 };
+const ball = { x: centerX, y: centerY, vx: 7, vy: 4.2, r: 10, trail: [] };
 
-function resetBall(){
-  ball.x=400;
-  ball.y=200;
-  ball.vx = (Math.random()>0.5?4:-4);
-  ball.vy = (Math.random()*4-2);
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+function rand(min, max) { return Math.random() * (max - min) + min; }
+
+function resetBall(direction = Math.random() > 0.5 ? 1 : -1) {
+  ball.x = centerX;
+  ball.y = centerY;
+  const speed = 7 + (level - 1) * 0.6;
+  ball.vx = direction * speed;
+  ball.vy = rand(-4.8, 4.8);
+  ball.trail.length = 0;
 }
 
-function draw(){
-  ctx.clearRect(0,0,800,400);
+function resetGame() {
+  scoreL = 0;
+  scoreR = 0;
+  level = 1;
+  left.y = centerY - left.h / 2;
+  right.y = centerY - right.h / 2;
+  winner = null;
+  gameOver = false;
+  particles = [];
+  resultEl.classList.add('hidden');
+  resultEl.classList.remove('show');
+  endModal.classList.add('hidden');
+  startModal.classList.add('hidden');
+  updateHud();
+  resetBall(Math.random() > 0.5 ? 1 : -1);
+  running = true;
+}
 
-  ctx.fillStyle="#00e5ff";
-  ctx.fillRect(left.x,left.y,left.w,left.h);
-  ctx.fillRect(right.x,right.y,right.w,right.h);
+function updateHud() {
+  leftScoreEl.textContent = scoreL;
+  rightScoreEl.textContent = scoreR;
+  levelEl.textContent = level;
+}
 
+function addParticles(x, y, color, amount = 12) {
+  for (let i = 0; i < amount; i++) {
+    particles.push({
+      x, y,
+      vx: rand(-4, 4),
+      vy: rand(-4, 4),
+      life: 1,
+      color
+    });
+  }
+}
+
+function drawBackground() {
+  ctx.clearRect(0, 0, W, H);
+
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#050816');
+  g.addColorStop(1, '#08111f');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+
+  const blobs = [
+    [W * 0.22, H * 0.18, 'rgba(0,229,255,0.15)'],
+    [W * 0.78, H * 0.26, 'rgba(255,61,242,0.14)'],
+    [W * 0.50, H * 0.84, 'rgba(124,58,237,0.16)']
+  ];
+  blobs.forEach(([x, y, color]) => {
+    const rg = ctx.createRadialGradient(x, y, 10, x, y, 180);
+    rg.addColorStop(0, color);
+    rg.addColorStop(1, 'transparent');
+    ctx.fillStyle = rg;
+    ctx.beginPath();
+    ctx.arc(x, y, 180, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  ctx.fillStyle = 'rgba(255,255,255,0.03)';
+  for (let y = 0; y < H; y += 36) {
+    ctx.fillRect(0, y, W, 1);
+  }
+
+  for (let y = 20; y < H; y += 28) {
+    ctx.fillStyle = 'rgba(0,229,255,0.75)';
+    ctx.fillRect(centerX - 3, y, 6, 16);
+  }
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  const min = Math.min(w, h);
+  if (r > min / 2) r = min / 2;
   ctx.beginPath();
-  ctx.fillStyle="#ff3df2";
-  ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);
-  ctx.fill();
-
-  ctx.fillStyle="#fff";
-  ctx.fillRect(398,0,4,400);
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
 }
 
-function update(){
-  // player
-  if(keys['w']) left.y -= 6;
-  if(keys['s']) left.y += 6;
+function drawPaddle(p, color) {
+  const glow = ctx.createLinearGradient(p.x, p.y, p.x + p.w, p.y + p.h);
+  glow.addColorStop(0, 'rgba(255,255,255,0.12)');
+  glow.addColorStop(0.5, color);
+  glow.addColorStop(1, 'rgba(255,255,255,0.08)');
+  ctx.shadowBlur = 22;
+  ctx.shadowColor = color;
+  ctx.fillStyle = glow;
+  roundRect(ctx, p.x, p.y, p.w, p.h, 8);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+}
 
-  left.y = Math.max(0,Math.min(320,left.y));
+function drawBall() {
+  ball.trail.forEach((t, idx) => {
+    const alpha = idx / ball.trail.length;
+    ctx.fillStyle = `rgba(255,61,242,${alpha * 0.32})`;
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, ball.r * (0.55 + alpha * 0.4), 0, Math.PI * 2);
+    ctx.fill();
+  });
 
-  // AI
-  right.y += (ball.y - (right.y+40))*0.08;
+  const rg = ctx.createRadialGradient(ball.x - 3, ball.y - 3, 2, ball.x, ball.y, 18);
+  rg.addColorStop(0, '#ffffff');
+  rg.addColorStop(0.35, '#ff9df8');
+  rg.addColorStop(1, '#ff3df2');
+  ctx.shadowBlur = 28;
+  ctx.shadowColor = '#ff3df2';
+  ctx.fillStyle = rg;
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+}
 
-  // ball
+function drawParticles(dt) {
+  particles = particles.filter(p => p.life > 0);
+  for (const p of particles) {
+    p.x += p.vx * dt * 60;
+    p.y += p.vy * dt * 60;
+    p.life -= dt * 1.8;
+    ctx.globalAlpha = Math.max(0, p.life);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x, p.y, 3, 3);
+    ctx.globalAlpha = 1;
+  }
+}
+
+function maybeLevelUp() {
+  const nextLevel = 1 + Math.floor((scoreL + scoreR) / 2);
+  if (nextLevel !== level) level = nextLevel;
+}
+
+function update(dt) {
+  if (!running || gameOver) return;
+
+  const keyboardMove = (keys['w'] ? -1 : 0) + (keys['s'] ? 1 : 0) + (keys['arrowup'] ? -1 : 0) + (keys['arrowdown'] ? 1 : 0);
+  if (keyboardMove !== 0) {
+    left.y += keyboardMove * (760 * dt);
+  } else if (pointerActive) {
+    const desired = mouseY - left.h / 2;
+    left.y += (desired - left.y) * Math.min(1, 12 * dt);
+  }
+
+  left.y = clamp(left.y, 0, H - left.h);
+
+  const aiSpeed = 5.8 + Math.min(5, (scoreL + scoreR) * 0.22);
+  const aiTarget = ball.y - right.h / 2 + Math.sin(performance.now() / 260) * 18;
+  right.y += (aiTarget - right.y) * (aiSpeed * dt);
+  right.y = clamp(right.y, 0, H - right.h);
+
   ball.x += ball.vx;
   ball.y += ball.vy;
 
-  if(ball.y<0||ball.y>400) ball.vy*=-1;
+  ball.trail.push({ x: ball.x, y: ball.y });
+  if (ball.trail.length > 14) ball.trail.shift();
 
-  // left paddle
-  if(ball.x<left.x+left.w && ball.y>left.y && ball.y<left.y+left.h){
-    ball.vx*=-1;
+  if (ball.y - ball.r <= 0) {
+    ball.y = ball.r;
+    ball.vy *= -1;
+    addParticles(ball.x, ball.y, 'rgba(0,229,255,0.85)', 8);
+  }
+  if (ball.y + ball.r >= H) {
+    ball.y = H - ball.r;
+    ball.vy *= -1;
+    addParticles(ball.x, ball.y, 'rgba(0,229,255,0.85)', 8);
   }
 
-  // right paddle
-  if(ball.x>right.x && ball.y>right.y && ball.y<right.y+right.h){
-    ball.vx*=-1;
+  if (ball.vx < 0 && ball.x - ball.r <= left.x + left.w) {
+    if (ball.y >= left.y && ball.y <= left.y + left.h) {
+      const hit = (ball.y - (left.y + left.h / 2)) / (left.h / 2);
+      ball.x = left.x + left.w + ball.r;
+      ball.vx = Math.abs(ball.vx) * 1.06;
+      ball.vy += hit * 2.1;
+      addParticles(ball.x, ball.y, 'rgba(0,229,255,0.85)', 14);
+    }
   }
 
-  // score
-  if(ball.x<0){
-    right.score++;
-    resetBall();
-  }
-  if(ball.x>800){
-    left.score++;
-    resetBall();
+  if (ball.vx > 0 && ball.x + ball.r >= right.x) {
+    if (ball.y >= right.y && ball.y <= right.y + right.h) {
+      const hit = (ball.y - (right.y + right.h / 2)) / (right.h / 2);
+      ball.x = right.x - ball.r;
+      ball.vx = -Math.abs(ball.vx) * 1.03;
+      ball.vy += hit * 1.8;
+      addParticles(ball.x, ball.y, 'rgba(255,61,242,0.85)', 14);
+    }
   }
 
-  document.getElementById('score').innerText = left.score + " : " + right.score;
+  if (ball.x + ball.r < 0) {
+    scoreR++;
+    updateHud();
+    maybeLevelUp();
+    resetBall(1);
+  }
+
+  if (ball.x - ball.r > W) {
+    scoreL++;
+    updateHud();
+    maybeLevelUp();
+    resetBall(-1);
+  }
+
+  if (scoreL >= targetScore || scoreR >= targetScore) {
+    gameOver = true;
+    running = false;
+    winner = scoreL >= targetScore ? 'player' : 'ai';
+    if (winner === 'player') {
+      endModal.classList.remove('hidden');
+      endModal.classList.add('show');
+    }
+  }
 }
 
-function loop(){
-  update();
-  draw();
+function draw(dt) {
+  drawBackground();
+  drawParticles(dt);
+  drawPaddle(left, '#00e5ff');
+  drawPaddle(right, '#ff3df2');
+  drawBall();
+}
+
+function loop(now) {
+  const dt = Math.min(0.033, (now - lastTime) / 1000);
+  lastTime = now;
+  update(dt);
+  draw(dt);
   requestAnimationFrame(loop);
 }
 
-loop();
-
-function reset(){
-  left.score=0;
-  right.score=0;
-  resetBall();
+function showPlan(type) {
+  resultEl.classList.remove('hidden');
+  resultEl.classList.add('show');
+  if (type === 'good') {
+    resultEl.innerHTML = `
+      <div class="emoji">☀️⛰️🎲</div>
+      <h2>Plan bei gutem Wetter</h2>
+      <p>Wir gehen hoch zur Hoggetse und essen dort etwas. Danach machen wir einen Spieleabend.</p>
+    `;
+  } else {
+    resultEl.innerHTML = `
+      <div class="emoji">🌧️🍕🎬</div>
+      <h2>Plan bei schlechtem Wetter</h2>
+      <p>Wir gehen ins Kino oder machen einen Spielenachmittag mit Essen bestellen. Im Kino laufen Die 3 Fragezeichen, Hoopers und Checker Tobi.</p>
+    `;
+  }
 }
+
+window.addEventListener('keydown', (e) => {
+  keys[e.key.toLowerCase()] = true;
+  if ((e.key === 'Enter' || e.key === ' ') && !running && !gameOver) {
+    resetGame();
+  }
+  if (e.key.toLowerCase() === 'r') {
+    resetGame();
+  }
+});
+window.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
+
+function setPointerFromEvent(ev) {
+  const rect = canvas.getBoundingClientRect();
+  const clientY = ev.touches ? ev.touches[0].clientY : ev.clientY;
+  mouseY = ((clientY - rect.top) / rect.height) * H;
+  pointerActive = true;
+}
+
+canvas.addEventListener('pointermove', setPointerFromEvent);
+canvas.addEventListener('pointerdown', setPointerFromEvent);
+canvas.addEventListener('touchmove', (e) => { e.preventDefault(); setPointerFromEvent(e); }, { passive: false });
+canvas.addEventListener('mouseleave', () => { pointerActive = false; });
+canvas.addEventListener('touchend', () => { pointerActive = false; });
+
+startBtn.addEventListener('click', resetGame);
+
+updateHud();
+resetBall(1);
+requestAnimationFrame(loop);
 </script></body>
 </html>
