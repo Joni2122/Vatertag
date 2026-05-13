@@ -1,134 +1,447 @@
-<!DOCTYPE html><html lang="de">
+<!DOCTYPE html>
+<html lang="de">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Neon Pong Royale</title>
-<([webflow.com](https://webflow.com/blog/web-design-trends-2025?utm_source=chatgpt.com))00e5ff;
-    --pink: #ff3df2;
-    --violet: #7c3aed;
-    --text: #e5f3ff;
-    --panel: rgba(9, 14, 30, 0.72);
-    --line: rgba(255,255,255,0.12);
-  }{ box-sizing: border-box; } html, body { height: 100%; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vatertags-Pong</title>
+  <style>
+    :root{
+      --bg: #0c1117;
+      --panel: rgba(19, 25, 34, 0.92);
+      --panel2: rgba(28, 36, 48, 0.95);
+      --line: rgba(255,255,255,0.10);
+      --text: #eef4f8;
+      --muted: #a8b4c1;
+      --red: #ef4444;
+      --red2: #dc2626;
+      --gray: #e5e7eb;
+      --dark: #1f2937;
+      --blue: #2563eb;
+      --good: #f59e0b;
+      --shadow: 0 20px 60px rgba(0,0,0,0.35);
+    }
 
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
 
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; overflow: hidden; color: var(--text); font-family: Inter, Segoe UI, Arial, sans-serif; background: radial-gradient(circle at 20% 20%, rgba(0,229,255,.18), transparent 22%), radial-gradient(circle at 80% 25%, rgba(255,61,242,.16), transparent 24%), radial-gradient(circle at 50% 85%, rgba(124,58,237,.18), transparent 28%), linear-gradient(-45deg, #030712, #091126, #140f2d, #030712); background-size: 100% 100%, 100% 100%, 100% 100%, 400% 400%; animation: backgroundFlow 18s ease infinite; }
+    body{
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(239,68,68,0.12), transparent 26%),
+        radial-gradient(circle at top right, rgba(37,99,235,0.12), transparent 24%),
+        linear-gradient(180deg, #090c10 0%, #0c1117 52%, #090c10 100%);
+      overflow-x: hidden;
+    }
 
-body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 44px 44px; mask-image: radial-gradient(circle at center, black 40%, transparent 100%); opacity: 0.45; animation: gridDrift 22s linear infinite; pointer-events: none; }
+    body::before{
+      content:"";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(circle at center, black 34%, transparent 100%);
+      opacity: 0.45;
+    }
 
-body::after { content: ''; position: fixed; inset: -20%; background: radial-gradient(circle, rgba(0,229,255,.08), transparent 40%), radial-gradient(circle, rgba(255,61,242,.07), transparent 34%); filter: blur(40px); animation: glowPulse 8s ease-in-out infinite alternate; pointer-events: none; }
+    .page{
+      width: min(1180px, calc(100vw - 20px));
+      margin: 10px auto 18px;
+      padding: 10px;
+    }
 
-@keyframes backgroundFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } } @keyframes gridDrift { from { transform: translateY(0); } to { transform: translateY(44px); } } @keyframes glowPulse { from { transform: scale(1); opacity: 0.85; } to { transform: scale(1.08); opacity: 1; } }
+    .hero{
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+      padding: 10px 4px 6px;
+    }
 
-.shell { position: relative; z-index: 1; width: min(96vw, 1120px); padding: 18px; }
+    .title h1{
+      margin: 0;
+      font-size: clamp(2rem, 4.6vw, 3.8rem);
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+    }
 
-.frame { position: relative; padding: 18px; border-radius: 30px; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 0 25px rgba(0,229,255,.16), 0 0 80px rgba(255,61,242,.14), inset 0 1px 0 rgba(255,255,255,.08); backdrop-filter: blur(18px); overflow: hidden; }
+    .title p{
+      margin: 10px 0 0;
+      max-width: 64ch;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 0.98rem;
+    }
 
-.frame::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,229,255,.14), rgba(255,61,242,.08), transparent 55%); pointer-events: none; }
+    .badge{
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      min-width: 260px;
+    }
 
-.topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 6px 6px 18px; }
+    .badge .small{
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
 
-.titleBlock { text-align: left; }
+    .chips{
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
 
-h1 { margin: 0; font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1; letter-spacing: 0.08em; text-transform: uppercase; background: linear-gradient(90deg, var(--cyan), var(--pink), var(--violet), var(--cyan)); background-size: 300% 100%; animation: titleShift 7s linear infinite; -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 30px rgba(0,229,255,.22); }
+    .chip{
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.92rem;
+      white-space: nowrap;
+    }
 
-@keyframes titleShift { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
+    .layout{
+      display: grid;
+      grid-template-columns: 1.65fr 1fr;
+      gap: 14px;
+      align-items: start;
+    }
 
-.subtitle { margin-top: 8px; color: rgba(229,243,255,.78); font-size: 0.98rem; max-width: 60ch; line-height: 1.5; }
+    .panel{
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
 
-.hud { display: grid; grid-template-columns: repeat(3, auto); gap: 10px; align-items: center; justify-content: end; }
+    .panelHead{
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+    }
 
-.pill { padding: 10px 14px; border-radius: 999px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); box-shadow: inset 0 0 18px rgba(255,255,255,.03); font-weight: 700; letter-spacing: .03em; white-space: nowrap; }
+    .panelHead h2{
+      margin: 0;
+      font-size: 1.02rem;
+      letter-spacing: 0.01em;
+    }
 
-.pill strong { color: white; }
+    .scoreRow{
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
 
-.boardWrap { position: relative; }
+    .score{
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
 
-canvas { width: min(94vw, 1060px); height: auto; display: block; margin: 0 auto; border-radius: 22px; background: radial-gradient(circle at top, rgba(0,229,255,.07), transparent 30%), linear-gradient(180deg, #040816, #080f22 60%, #040816); border: 1px solid rgba(0,229,255,.45); box-shadow: 0 0 30px rgba(0,229,255,.26), 0 0 90px rgba(255,61,242,.11), inset 0 0 22px rgba(255,255,255,.03); touch-action: none; }
+    .score strong{ color: #fff; }
 
-.hintRow { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 14px; color: rgba(229,243,255,.8); font-size: 0.95rem; }
+    .gameWrap{
+      padding: 14px;
+      background:
+        radial-gradient(circle at top, rgba(239,68,68,0.06), transparent 26%),
+        radial-gradient(circle at bottom right, rgba(37,99,235,0.08), transparent 26%),
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    }
 
-.buttonRow { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+    canvas{
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #0f172a, #0b1220);
+      border: 1px solid rgba(255,255,255,0.10);
+      touch-action: none;
+    }
 
-button { border: 0; border-radius: 16px; padding: 12px 18px; color: white; font-weight: 800; letter-spacing: .03em; cursor: pointer; background: linear-gradient(135deg, var(--cyan), var(--violet), var(--pink)); background-size: 240% 240%; animation: buttonFlow 6s ease infinite; box-shadow: 0 0 20px rgba(0,229,255,.22), 0 0 25px rgba(255,61,242,.12); transition: transform .18s ease, box-shadow .18s ease; }
+    .controls{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
 
-button:hover { transform: translateY(-2px) scale(1.02); } button:active { transform: translateY(0) scale(.99); }
+    button{
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+    }
 
-@keyframes buttonFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    button:hover{ transform: translateY(-1px); }
 
-.overlay { position: absolute; inset: 18px; display: grid; place-items: center; pointer-events: none; }
+    .btn-start{
+      background: var(--red);
+      color: white;
+      box-shadow: 0 10px 24px rgba(239,68,68,0.22);
+    }
 
-.modal { width: min(92%, 560px); padding: 26px; border-radius: 24px; background: rgba(4,10,24,.72); border: 1px solid rgba(255,255,255,.1); box-shadow: 0 0 30px rgba(0,229,255,.18), inset 0 1px 0 rgba(255,255,255,.05); text-align: center; opacity: 0; transform: translateY(16px) scale(.98); transition: opacity .22s ease, transform .22s ease; backdrop-filter: blur(16px); }
+    .btn-start:hover{ box-shadow: 0 12px 28px rgba(239,68,68,0.28); }
 
-.modal.show { opacity: 1; transform: translateY(0) scale(1); }
+    .btn-reset{
+      background: var(--gray);
+      color: #111827;
+    }
 
-.modal h2 { margin: 0 0 10px; font-size: clamp(1.7rem, 3vw, 2.3rem); }
+    .btn-dark{
+      background: var(--dark);
+      color: white;
+    }
 
-.modal p { margin: 0; color: rgba(229,243,255,.86); line-height: 1.6; font-size: 1.05rem; }
+    .btn-good{
+      background: linear-gradient(180deg, #fbbf24, #f59e0b);
+      color: #111827;
+    }
 
-.emoji { font-size: 3.2rem; margin-bottom: 8px; }
+    .btn-bad{
+      background: linear-gradient(180deg, #ef4444, #dc2626);
+      color: white;
+    }
 
-.hidden { display: none; }
+    .side{
+      display: grid;
+      gap: 12px;
+    }
 
-@media (max-width: 760px) { .topbar { flex-direction: column; align-items: stretch; } .titleBlock { text-align: center; } .hud { justify-content: center; } .hintRow { text-align: center; justify-content: center; } } </style>
+    .card{
+      background: var(--panel2);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+    }
 
+    .card h3{
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+
+    .card p{
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.58;
+      font-size: 0.95rem;
+    }
+
+    .planBox{
+      display: grid;
+      gap: 12px;
+    }
+
+    .planButtons{
+      display: none;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .planResult{
+      display: none;
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .planResult h3{
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+
+    .planResult p{
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .overlay{
+      margin-top: 12px;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .overlay h3{
+      margin: 0 0 8px;
+      font-size: 1.02rem;
+    }
+
+    .overlay p{
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .modal{
+      position: absolute;
+      inset: 18px;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+    }
+
+    .modalInner{
+      width: min(560px, 92%);
+      padding: 22px;
+      border-radius: 22px;
+      text-align: center;
+      background: rgba(9,14,20,0.88);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(12px) scale(.98);
+      transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .modalInner.show{
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .emoji{
+      font-size: 2.8rem;
+      margin-bottom: 8px;
+    }
+
+    .hidden{ display: none !important; }
+
+    @media (max-width: 960px){
+      .layout{ grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px){
+      .page{ width: min(100vw - 10px, 1180px); padding: 4px; }
+      .hero{ padding: 8px 4px 4px; }
+      .gameWrap{ padding: 10px; }
+      .panelHead, .card{ padding-left: 12px; padding-right: 12px; }
+    }
+  </style>
 </head>
 <body>
-  <div class="shell">
-    <div class="frame">
-      <div class="topbar">
-        <div class="titleBlock">
-          <h1>Neon Pong Royale</h1>
-          <div class="subtitle">Schieb den linken Schläger mit Maus, Touch oder W/S. Die AI rechts wird schneller, wenn du gut spielst.</div>
-        </div>
-        <div class="hud">
-          <div class="pill">Du: <strong id="leftScore">0</strong></div>
-          <div class="pill">AI: <strong id="rightScore">0</strong></div>
-          <div class="pill">Level: <strong id="level">1</strong></div>
-        </div>
-      </div><div class="boardWrap">
-    <canvas id="game" width="1100" height="620"></canvas>
-    <div class="overlay">
-      <div id="startModal" class="modal show">
-        <div class="emoji">⚡🏓✨</div>
-        <h2>Bereit?</h2>
-        <p>Bewege deinen Schläger mit Maus, Touch oder W/S. Klicke auf Start und versuche die AI zu schlagen.</p>
-        <div class="buttonRow">
-          <button id="startBtn">Spiel starten</button>
-        </div>
+  <div class="page">
+    <div class="hero">
+      <div class="title">
+        <h1>Vatertags-Pong</h1>
+        <p>Erst spielst du gegen die AI. Wenn du gewinnst, erscheint die Wetterauswahl. So ist die Seite aufgeräumt, breit und klar.</p>
       </div>
 
-      <div id="endModal" class="modal hidden">
-        <div class="emoji">🎉</div>
-        <h2>Gewonnen!</h2>
-        <p>Du hast das Match geholt und den Wetter-Plan freigeschaltet.</p>
-        <div class="buttonRow">
-          <button onclick="showPlan('good')">☀️ Gutes Wetter</button>
-          <button onclick="showPlan('bad')">🌧️ Schlechtes Wetter</button>
+      <div class="badge">
+        <div class="small">Steuerung und Ablauf</div>
+        <div class="chips">
+          <div class="chip">Maus / Touch / W-S</div>
+          <div class="chip">Ziel: 7 Punkte</div>
+          <div class="chip">Plan erst nach Sieg</div>
         </div>
       </div>
     </div>
+
+    <div class="layout">
+      <section class="panel">
+        <div class="panelHead">
+          <h2>Spiel</h2>
+          <div class="scoreRow">
+            <div class="score">Du: <strong id="leftScore">0</strong></div>
+            <div class="score">AI: <strong id="rightScore">0</strong></div>
+            <div class="score">Level: <strong id="level">1</strong></div>
+          </div>
+        </div>
+
+        <div class="gameWrap">
+          <canvas id="game" width="1100" height="620"></canvas>
+
+          <div class="controls">
+            <button id="startBtn" class="btn-start">Spiel starten</button>
+            <button id="resetBtn" class="btn-reset">Neu starten</button>
+            <button id="muteBtn" class="btn-dark">Sound aus/an</button>
+          </div>
+
+          <div class="overlay">
+            <div id="startModal" class="modalInner show">
+              <div class="emoji">🏓</div>
+              <h3>Bereit?</h3>
+              <p>Starte das Spiel und bewege den linken Schläger mit Maus, Touch oder W/S. Das Spielfeld bleibt komplett sichtbar, und der Wetter-Plan kommt erst nach dem Sieg.</p>
+            </div>
+
+            <div id="winModal" class="modalInner hidden">
+              <div class="emoji">🎉</div>
+              <h3>Gewonnen!</h3>
+              <p>Jetzt kannst du den Wetter-Plan auswählen.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side">
+        <div class="card">
+          <h3>So läuft der Tag</h3>
+          <p>Erst Pong spielen. Danach kommt die Auswahl für gutes oder schlechtes Wetter.</p>
+        </div>
+
+        <div class="card">
+          <h3>Gutes Wetter</h3>
+          <p>Hoggetse hochgehen, dort essen und danach Spieleabend.</p>
+        </div>
+
+        <div class="card">
+          <h3>Schlechtes Wetter</h3>
+          <p>Kino oder Spielenachmittag mit Essen bestellen. Im Kino laufen Die 3 Fragezeichen, Hoopers und Checker Tobi.</p>
+        </div>
+
+        <div class="card planBox">
+          <h3>Wetterauswahl</h3>
+          <p>Die Buttons erscheinen erst nach dem Sieg.</p>
+          <div id="weatherButtons" class="planButtons">
+            <button class="btn-good" onclick="showPlan('good')">Gutes Wetter</button>
+            <button class="btn-bad" onclick="showPlan('bad')">Schlechtes Wetter</button>
+          </div>
+          <div id="planResult" class="planResult"></div>
+        </div>
+      </aside>
+    </div>
   </div>
 
-  <div class="hintRow">
-    <div>Steuerung: Maus / Touch / W &amp; S</div>
-    <div>Ziel: 7 Punkte</div>
-    <div>Die AI passt sich an</div>
-  </div>
-
-  <div id="result" class="modal hidden" style="margin: 16px auto 0; max-width: 760px;"></div>
-</div>
-
-  </div><script>
+<script>
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
+
 const leftScoreEl = document.getElementById('leftScore');
 const rightScoreEl = document.getElementById('rightScore');
 const levelEl = document.getElementById('level');
+
 const startModal = document.getElementById('startModal');
-const endModal = document.getElementById('endModal');
-const resultEl = document.getElementById('result');
+const winModal = document.getElementById('winModal');
+const weatherButtons = document.getElementById('weatherButtons');
+const planResult = document.getElementById('planResult');
+
 const startBtn = document.getElementById('startBtn');
+const resetBtn = document.getElementById('resetBtn');
+const muteBtn = document.getElementById('muteBtn');
 
 const W = canvas.width;
 const H = canvas.height;
@@ -138,7 +451,6 @@ const targetScore = 7;
 
 let running = false;
 let gameOver = false;
-let winner = null;
 let scoreL = 0;
 let scoreR = 0;
 let level = 1;
@@ -147,6 +459,8 @@ let mouseY = centerY;
 let pointerActive = false;
 let lastTime = performance.now();
 let particles = [];
+let soundOn = true;
+let audioCtx = null;
 
 const left = { x: 42, y: centerY - 70, w: 16, h: 140 };
 const right = { x: W - 58, y: centerY - 70, w: 16, h: 140 };
@@ -155,31 +469,29 @@ const ball = { x: centerX, y: centerY, vx: 7, vy: 4.2, r: 10, trail: [] };
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 function rand(min, max) { return Math.random() * (max - min) + min; }
 
+function beep(freq = 220, dur = 0.06, type = 'sine', gainVal = 0.02) {
+  if (!soundOn) return;
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.value = gainVal;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + dur);
+  } catch (e) {}
+}
+
 function resetBall(direction = Math.random() > 0.5 ? 1 : -1) {
   ball.x = centerX;
   ball.y = centerY;
-  const speed = 7 + (level - 1) * 0.6;
+  const speed = 7 + (level - 1) * 0.55;
   ball.vx = direction * speed;
-  ball.vy = rand(-4.8, 4.8);
+  ball.vy = rand(-4.5, 4.5);
   ball.trail.length = 0;
-}
-
-function resetGame() {
-  scoreL = 0;
-  scoreR = 0;
-  level = 1;
-  left.y = centerY - left.h / 2;
-  right.y = centerY - right.h / 2;
-  winner = null;
-  gameOver = false;
-  particles = [];
-  resultEl.classList.add('hidden');
-  resultEl.classList.remove('show');
-  endModal.classList.add('hidden');
-  startModal.classList.add('hidden');
-  updateHud();
-  resetBall(Math.random() > 0.5 ? 1 : -1);
-  running = true;
 }
 
 function updateHud() {
@@ -200,38 +512,48 @@ function addParticles(x, y, color, amount = 12) {
   }
 }
 
+function resetGame() {
+  scoreL = 0;
+  scoreR = 0;
+  level = 1;
+  gameOver = false;
+  particles = [];
+  left.y = centerY - left.h / 2;
+  right.y = centerY - right.h / 2;
+  resultClear();
+  updateHud();
+  resetBall(Math.random() > 0.5 ? 1 : -1);
+  running = true;
+  startModal.classList.add('hidden');
+  winModal.classList.add('hidden');
+}
+
+function resultClear() {
+  planResult.className = 'planResult';
+  planResult.innerHTML = '';
+  weatherButtons.classList.add('hidden');
+}
+
 function drawBackground() {
   ctx.clearRect(0, 0, W, H);
-
-  const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, '#050816');
-  g.addColorStop(1, '#08111f');
-  ctx.fillStyle = g;
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#0f172a');
+  bg.addColorStop(1, '#0b1220');
+  ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
-  const blobs = [
-    [W * 0.22, H * 0.18, 'rgba(0,229,255,0.15)'],
-    [W * 0.78, H * 0.26, 'rgba(255,61,242,0.14)'],
-    [W * 0.50, H * 0.84, 'rgba(124,58,237,0.16)']
-  ];
-  blobs.forEach(([x, y, color]) => {
-    const rg = ctx.createRadialGradient(x, y, 10, x, y, 180);
-    rg.addColorStop(0, color);
-    rg.addColorStop(1, 'transparent');
-    ctx.fillStyle = rg;
-    ctx.beginPath();
-    ctx.arc(x, y, 180, 0, Math.PI * 2);
-    ctx.fill();
-  });
-
   ctx.fillStyle = 'rgba(255,255,255,0.03)';
-  for (let y = 0; y < H; y += 36) {
-    ctx.fillRect(0, y, W, 1);
-  }
+  for (let y = 0; y < H; y += 36) ctx.fillRect(0, y, W, 1);
+
+  const glow = ctx.createRadialGradient(centerX, centerY, 40, centerX, centerY, 300);
+  glow.addColorStop(0, 'rgba(255,255,255,0.05)');
+  glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, W, H);
 
   for (let y = 20; y < H; y += 28) {
-    ctx.fillStyle = 'rgba(0,229,255,0.75)';
-    ctx.fillRect(centerX - 3, y, 6, 16);
+    ctx.fillStyle = 'rgba(255,255,255,0.20)';
+    ctx.fillRect(centerX - 2, y, 4, 16);
   }
 }
 
@@ -248,38 +570,24 @@ function roundRect(ctx, x, y, w, h, r) {
 }
 
 function drawPaddle(p, color) {
-  const glow = ctx.createLinearGradient(p.x, p.y, p.x + p.w, p.y + p.h);
-  glow.addColorStop(0, 'rgba(255,255,255,0.12)');
-  glow.addColorStop(0.5, color);
-  glow.addColorStop(1, 'rgba(255,255,255,0.08)');
-  ctx.shadowBlur = 22;
-  ctx.shadowColor = color;
-  ctx.fillStyle = glow;
+  ctx.fillStyle = color;
   roundRect(ctx, p.x, p.y, p.w, p.h, 8);
   ctx.fill();
-  ctx.shadowBlur = 0;
 }
 
 function drawBall() {
   ball.trail.forEach((t, idx) => {
     const alpha = idx / ball.trail.length;
-    ctx.fillStyle = `rgba(255,61,242,${alpha * 0.32})`;
+    ctx.fillStyle = `rgba(255,255,255,${alpha * 0.12})`;
     ctx.beginPath();
-    ctx.arc(t.x, t.y, ball.r * (0.55 + alpha * 0.4), 0, Math.PI * 2);
+    ctx.arc(t.x, t.y, ball.r * (0.6 + alpha * 0.4), 0, Math.PI * 2);
     ctx.fill();
   });
 
-  const rg = ctx.createRadialGradient(ball.x - 3, ball.y - 3, 2, ball.x, ball.y, 18);
-  rg.addColorStop(0, '#ffffff');
-  rg.addColorStop(0.35, '#ff9df8');
-  rg.addColorStop(1, '#ff3df2');
-  ctx.shadowBlur = 28;
-  ctx.shadowColor = '#ff3df2';
-  ctx.fillStyle = rg;
+  ctx.fillStyle = '#ffffff';
   ctx.beginPath();
   ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
   ctx.fill();
-  ctx.shadowBlur = 0;
 }
 
 function drawParticles(dt) {
@@ -303,7 +611,12 @@ function maybeLevelUp() {
 function update(dt) {
   if (!running || gameOver) return;
 
-  const keyboardMove = (keys['w'] ? -1 : 0) + (keys['s'] ? 1 : 0) + (keys['arrowup'] ? -1 : 0) + (keys['arrowdown'] ? 1 : 0);
+  const keyboardMove =
+    (keys['w'] ? -1 : 0) +
+    (keys['s'] ? 1 : 0) +
+    (keys['arrowup'] ? -1 : 0) +
+    (keys['arrowdown'] ? 1 : 0);
+
   if (keyboardMove !== 0) {
     left.y += keyboardMove * (760 * dt);
   } else if (pointerActive) {
@@ -313,7 +626,7 @@ function update(dt) {
 
   left.y = clamp(left.y, 0, H - left.h);
 
-  const aiSpeed = 5.8 + Math.min(5, (scoreL + scoreR) * 0.22);
+  const aiSpeed = 5.6 + Math.min(4.8, (scoreL + scoreR) * 0.22);
   const aiTarget = ball.y - right.h / 2 + Math.sin(performance.now() / 260) * 18;
   right.y += (aiTarget - right.y) * (aiSpeed * dt);
   right.y = clamp(right.y, 0, H - right.h);
@@ -327,21 +640,25 @@ function update(dt) {
   if (ball.y - ball.r <= 0) {
     ball.y = ball.r;
     ball.vy *= -1;
-    addParticles(ball.x, ball.y, 'rgba(0,229,255,0.85)', 8);
+    addParticles(ball.x, ball.y, 'rgba(255,255,255,0.7)', 8);
+    beep(520, 0.03, 'square', 0.015);
   }
+
   if (ball.y + ball.r >= H) {
     ball.y = H - ball.r;
     ball.vy *= -1;
-    addParticles(ball.x, ball.y, 'rgba(0,229,255,0.85)', 8);
+    addParticles(ball.x, ball.y, 'rgba(255,255,255,0.7)', 8);
+    beep(520, 0.03, 'square', 0.015);
   }
 
   if (ball.vx < 0 && ball.x - ball.r <= left.x + left.w) {
     if (ball.y >= left.y && ball.y <= left.y + left.h) {
       const hit = (ball.y - (left.y + left.h / 2)) / (left.h / 2);
       ball.x = left.x + left.w + ball.r;
-      ball.vx = Math.abs(ball.vx) * 1.06;
-      ball.vy += hit * 2.1;
-      addParticles(ball.x, ball.y, 'rgba(0,229,255,0.85)', 14);
+      ball.vx = Math.abs(ball.vx) * 1.05;
+      ball.vy += hit * 2.0;
+      addParticles(ball.x, ball.y, 'rgba(255,255,255,0.7)', 14);
+      beep(260, 0.05, 'triangle', 0.03);
     }
   }
 
@@ -349,9 +666,10 @@ function update(dt) {
     if (ball.y >= right.y && ball.y <= right.y + right.h) {
       const hit = (ball.y - (right.y + right.h / 2)) / (right.h / 2);
       ball.x = right.x - ball.r;
-      ball.vx = -Math.abs(ball.vx) * 1.03;
-      ball.vy += hit * 1.8;
-      addParticles(ball.x, ball.y, 'rgba(255,61,242,0.85)', 14);
+      ball.vx = -Math.abs(ball.vx) * 1.02;
+      ball.vy += hit * 1.75;
+      addParticles(ball.x, ball.y, 'rgba(255,255,255,0.7)', 14);
+      beep(180, 0.05, 'triangle', 0.03);
     }
   }
 
@@ -372,10 +690,12 @@ function update(dt) {
   if (scoreL >= targetScore || scoreR >= targetScore) {
     gameOver = true;
     running = false;
-    winner = scoreL >= targetScore ? 'player' : 'ai';
-    if (winner === 'player') {
-      endModal.classList.remove('hidden');
-      endModal.classList.add('show');
+    if (scoreL >= targetScore) {
+      winModal.classList.remove('hidden');
+      winModal.classList.add('show');
+      weatherButtons.classList.remove('hidden');
+      beep(880, 0.08, 'sine', 0.03);
+      setTimeout(() => beep(1100, 0.08, 'sine', 0.03), 120);
     }
   }
 }
@@ -383,8 +703,8 @@ function update(dt) {
 function draw(dt) {
   drawBackground();
   drawParticles(dt);
-  drawPaddle(left, '#00e5ff');
-  drawPaddle(right, '#ff3df2');
+  drawPaddle(left, '#ef4444');
+  drawPaddle(right, '#111827');
   drawBall();
 }
 
@@ -397,18 +717,15 @@ function loop(now) {
 }
 
 function showPlan(type) {
-  resultEl.classList.remove('hidden');
-  resultEl.classList.add('show');
+  planResult.style.display = 'block';
   if (type === 'good') {
-    resultEl.innerHTML = `
-      <div class="emoji">☀️⛰️🎲</div>
-      <h2>Plan bei gutem Wetter</h2>
+    planResult.innerHTML = `
+      <h3>Gutes Wetter ☀️</h3>
       <p>Wir gehen hoch zur Hoggetse und essen dort etwas. Danach machen wir einen Spieleabend.</p>
     `;
   } else {
-    resultEl.innerHTML = `
-      <div class="emoji">🌧️🍕🎬</div>
-      <h2>Plan bei schlechtem Wetter</h2>
+    planResult.innerHTML = `
+      <h3>Schlechtes Wetter 🌧️</h3>
       <p>Wir gehen ins Kino oder machen einen Spielenachmittag mit Essen bestellen. Im Kino laufen Die 3 Fragezeichen, Hoopers und Checker Tobi.</p>
     `;
   }
@@ -416,14 +733,13 @@ function showPlan(type) {
 
 window.addEventListener('keydown', (e) => {
   keys[e.key.toLowerCase()] = true;
-  if ((e.key === 'Enter' || e.key === ' ') && !running && !gameOver) {
-    resetGame();
-  }
-  if (e.key.toLowerCase() === 'r') {
-    resetGame();
-  }
+  if ((e.key === 'Enter' || e.key === ' ') && !running && !gameOver) resetGame();
+  if (e.key.toLowerCase() === 'r') resetGame();
 });
-window.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
+
+window.addEventListener('keyup', (e) => {
+  keys[e.key.toLowerCase()] = false;
+});
 
 function setPointerFromEvent(ev) {
   const rect = canvas.getBoundingClientRect();
@@ -439,9 +755,15 @@ canvas.addEventListener('mouseleave', () => { pointerActive = false; });
 canvas.addEventListener('touchend', () => { pointerActive = false; });
 
 startBtn.addEventListener('click', resetGame);
+resetBtn.addEventListener('click', resetGame);
+muteBtn.addEventListener('click', () => {
+  soundOn = !soundOn;
+  muteBtn.textContent = soundOn ? 'Sound aus/an' : 'Sound an';
+});
 
 updateHud();
 resetBall(1);
 requestAnimationFrame(loop);
-</script></body>
+</script>
+</body>
 </html>
