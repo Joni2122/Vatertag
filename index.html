@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Wetter-Entscheider mit Minispiel</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #0b1020;
+      color: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    #game-container {
+      margin-top: 20px;
+      width: 320px;
+      height: 320px;
+      border-radius: 16px;
+      background: radial-gradient(circle at top, #2b3b7a, #050814);
+      box-shadow: 0 0 30px rgba(0,0,0,0.6);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    #start-btn, .choice-btn {
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      background: linear-gradient(135deg, #ffb347, #ff6b6b);
+      color: #1b1020;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+      transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.2s;
+    }
+
+    #start-btn:hover, .choice-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
+
+    #start-btn:active, .choice-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+    }
+
+    #target {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffffff, #00e0ff);
+      position: absolute;
+      display: none;
+      box-shadow: 0 0 18px rgba(0,224,255,0.9);
+      cursor: pointer;
+    }
+
+    #info, #status {
+      margin-top: 10px;
+      font-size: 14px;
+      text-align: center;
+      max-width: 320px;
+    }
+
+    #choices {
+      margin-top: 20px;
+      display: none;
+      gap: 10px;
+      display: flex;
+      justify-content: center;
+    }
+
+    #plan {
+      margin-top: 20px;
+      max-width: 420px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      background: rgba(10, 15, 35, 0.9);
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      font-size: 15px;
+      line-height: 1.5;
+      display: none;
+    }
+
+    .highlight {
+      color: #ffdd73;
+      font-weight: 600;
+    }
+
+    #score {
+      margin-top: 6px;
+      font-size: 13px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <h1>Wetter-Entscheider – aber erst das Arcade-Spiel 🎮</h1>
+
+  <div id="game-container">
+    <button id="start-btn">Spiel starten</button>
+    <div id="target"></div>
+    <div id="score">Treffer: <span id="hits">0</span> / 5</div>
+  </div>
+
+  <div id="info">
+    Klicke den leuchtenden Kreis so schnell wie möglich an.  
+    Schaffst du <span class="highlight">5 Treffer</span>, darfst du den Plan für morgen auswählen.
+  </div>
+
+  <div id="status"></div>
+
+  <div id="choices">
+    <button class="choice-btn" id="good-weather">Gutes Wetter 🌤️</button>
+    <button class="choice-btn" id="bad-weather">Schlechtes Wetter 🌧️</button>
+  </div>
+
+  <div id="plan"></div>
+
+  <script>
+    const startBtn = document.getElementById('start-btn');
+    const target = document.getElementById('target');
+    const hitsSpan = document.getElementById('hits');
+    const statusDiv = document.getElementById('status');
+    const choicesDiv = document.getElementById('choices');
+    const planDiv = document.getElementById('plan');
+    const goodBtn = document.getElementById('good-weather');
+    const badBtn = document.getElementById('bad-weather');
+    const gameContainer = document.getElementById('game-container');
+
+    let hits = 0;
+    let active = false;
+    let moveTimeout = null;
+
+    function randomPosition() {
+      const rect = gameContainer.getBoundingClientRect();
+      const size = 40;
+      const padding = 10;
+
+      const maxX = rect.width - size - padding;
+      const maxY = rect.height - size - padding;
+
+      const x = Math.random() * maxX + padding;
+      const y = Math.random() * maxY + padding;
+
+      target.style.left = x + 'px';
+      target.style.top = y + 'px';
+    }
+
+    function scheduleMove() {
+      const delay = 400 + Math.random() * 600; // 0.4–1.0 s
+      moveTimeout = setTimeout(() => {
+        if (!active) return;
+        randomPosition();
+        target.style.display = 'block';
+        scheduleMove();
+      }, delay);
+    }
+
+    function resetGame() {
+      hits = 0;
+      hitsSpan.textContent = hits;
+      statusDiv.textContent = '';
+      planDiv.style.display = 'none';
+      planDiv.textContent = '';
+      choicesDiv.style.display = 'none';
+    }
+
+    startBtn.addEventListener('click', () => {
+      resetGame();
+      active = true;
+      startBtn.style.opacity = '0.3';
+      startBtn.disabled = true;
+      target.style.display = 'none';
+      if (moveTimeout) clearTimeout(moveTimeout);
+      scheduleMove();
+    });
+
+    target.addEventListener('click', () => {
+      if (!active) return;
+      hits++;
+      hitsSpan.textContent = hits;
+      target.style.display = 'none';
+
+      if (hits >= 5) {
+        active = false;
+        if (moveTimeout) clearTimeout(moveTimeout);
+        statusDiv.textContent = 'Du hast gewonnen! Jetzt darfst du den Plan für morgen auswählen.';
+        choicesDiv.style.display = 'flex';
+        startBtn.style.opacity = '1';
+        startBtn.disabled = false;
+      }
+    });
+
+    goodBtn.addEventListener('click', () => {
+      planDiv.style.display = 'block';
+      planDiv.innerHTML = `
+        <p><span class="highlight">Wenn es morgen nicht regnet</span> und wir gutes Wetter haben:</p>
+        <p>Wir gehen hoch zur <span class="highlight">Hoggetse</span>, essen dort gemütlich etwas
+        und genießen das Wetter. Danach machen wir einen
+        <span class="highlight">Spieleabend</span> – Brettspiele, Karten oder was uns gerade Spaß macht.</p>
+      `;
+    });
+
+    badBtn.addEventListener('click', () => {
+      planDiv.style.display = 'block';
+      planDiv.innerHTML = `
+        <p><span class="highlight">Wenn es morgen regnet</span> und das Wetter eher mies ist:</p>
+        <p>Wir können ins <span class="highlight">Kino</span> gehen – dort laufen
+        <span class="highlight">Die drei ???</span>, <span class="highlight">Hoppers</span> und
+        <span class="highlight">Checker Tobi</span>.</p>
+        <p>Oder wir machen einen gemütlichen <span class="highlight">Spielenachmittag</span> zuhause,
+        bestellen etwas zu essen und machen es uns richtig bequem.</p>
+      `;
+    });
+  </script>
+</body>
+</html>
